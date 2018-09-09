@@ -66,8 +66,9 @@ class App extends React.Component {
                 component={props => (
                   <AuthPage {...props} authState={STATE_SIGNUP} />
                 )}
-              />       
-              <PrivateRoute path={`${process.env.PUBLIC_URL}/`} component={Home} />
+              />  
+              <PrivateRoute path={`${process.env.PUBLIC_URL}/`} component={Home} />     
+              {/* <PrivateRoute path={`${process.env.PUBLIC_URL}/`} component={Home} /> */}
             </Switch>
           </div>
         </Router>  

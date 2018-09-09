@@ -31,16 +31,19 @@ class EditDataPage extends Component {
      this.state = {
       schools: [],
       schoolData: {
-                  _id: '',
-                  year: '',
-                  week: '',
-                  month: '',
-                  elect_eur: '',
-                  elect_kwh: '',
-                  heating_eur: '',
-                  heating_kwh: '',
-                  water_eur: '',
-                  water_litres: '' ,       
+                    year: '',
+                    week: '',
+                    month: '',
+                    elect_eur: '',
+                    elect_kwh: '',
+                    heating_eur: '',
+                    heating_kwh: '',
+                    water_eur: '',
+                    water_litres: '' ,
+                    school_id: {
+                      pk : 0
+                    },
+                    ref_id: 0   
                   },
       message:''
     };
@@ -50,57 +53,53 @@ class EditDataPage extends Component {
     this.sendModifiedData = this.sendModifiedData.bind(this);
   }
   componentDidMount(){
-    axios.get('http://localhost:4200/api/schools')
+    axios.get('http://localhost:8000/api/school/')
     .then(response => {
-      this.setState({ schools: response.data });
+      this.setState({ schools: response.data.objects });
     })
     .catch(function(error) {
       console.log(error);
     });
-    const schoolid = this.props.match.params.schoolid;
-    const dataid = this.props.match.params.id;    
-    axios.get('http://localhost:4200/api/school/' + schoolid + '/statistics/' + dataid)
+
+    // const schoolid = this.props.match.params.schoolid;
+    // const dataid = this.props.match.params.id; 
+
+    axios.get('http://localhost:8000/api/statistics/statistics/' + this.statisticid + '/')
     .then(response => {
-      this.setState({ schoolData: response.data.data.statistic });
-      console.log(this.state.schoolData);
+      const schoolData = this.getSchoolData(response.data);
+      console.log("schoooldata");
+      console.log(schoolData);
+      this.setState({ schoolData: schoolData });
+      console.log(this.schoolData);
     })
     .catch(function(error){
       console.log(error);
     });
   }
 
-  // ('school/:schoolid/statistics/:statisticid')
-/*   componentWillMount(){
-    const schoolid = this.props.match.params.schoolid;
-    const dataid = this.props.match.params.id;    
-    axios.get('http://localhost:4200/api/school/' + schoolid + '/statistics/' + dataid)
-    .then(response => {
-      this.setState({ schoolData: response.data.statistic });
-      console.log('schoolid=');
-      console.log(schoolid);
-      console.log('dataid=');
-      console.log(dataid);
-    })
-    .catch(function(error){
-      console.log(error);
-    })
+  getSchoolData(object){
+    const schoolData = Object.assign({}, this.state.schoolData);
+    schoolData.year = object.year;
+    schoolData.month = object.month;
+    schoolData.week = object.week;
+    schoolData.elect_eur = object.elect_eur;
+    schoolData.elect_kwh = object.elect_kwh;
+    schoolData.heating_eur = object.heating_eur;
+    schoolData.heating_kwh = object.heating_kwh;
+    schoolData.water_eur = object.water_eur;
+    schoolData.water_litres = object.water_litres;
+    
+    const urlArray = object.school_id.split('/');
+    const school_id = urlArray[urlArray.length - 2];
+    schoolData.ref_id = school_id;
+    schoolData.school_id.pk = school_id;
+    return schoolData;
   }
- */
-
-/* 
-  schoolOption(){
-    if (this.state.schools instanceof Array) {
-      return this.state.schools.map(function(school, i){
-        return <option value={school._id} id={school._id} key={i}>{school.name}</option>;
-      })
-    }
-  }
-   */
 
   schoolOption(){
     if (this.state.schools instanceof Array) {
       return this.state.schools.map(function(school, i){
-        return <option value={school._id} id={school._id} key={i}>{school.name}</option>;
+        return <option value={school.id} id={school.id} key={i}>{school.school_name}</option>;
       })
     }
   }
@@ -137,28 +136,18 @@ class EditDataPage extends Component {
 
   // get the value when the value of inputbox is changed
   onChange(event) {
-    const schoolData = Object.assign({}, this.state.schoolData);
-    schoolData[event.target.name] = event.target.value;
-    this.setState({schoolData: schoolData});
+    const schoolDatum = Object.assign({}, this.state.schoolData);
+    console.log(schoolDatum);
+    schoolDatum[event.target.name] = event.target.value;
+    this.setState({schoolData: schoolDatum});
+    console.log("changed data are");
+    console.log(this.state.schoolData);
   }
 
-  // send the school data to server
-/*   sendSchoolData(data, schoolid, statisticid) {
-    axios.post('http://localhost:4200/api/school/' + schoolid + '/statistic/' + statisticid, data)
+  sendModifiedData(data, statisticid) {
+    axios.put('http://localhost:8000/api/statistics/statistics/' + statisticid + '/', data)
     .then(res => {      
-      this.setState({ schoolData: res.data , message: res.message});
-      // alert("success");
-      ToastStore.success("Data added successfully.", 3000);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-  } */
-
-  sendModifiedData(data, schoolid, statisticid) {
-    axios.post('http://localhost:4200/api/school/' + schoolid + '/statistics/' + statisticid, data)
-    .then(res => {      
-      this.setState({ schoolData: res.data , message: res.message});
+      // this.setState({ schoolData: res.data });
     })
     .catch(function (error) {
       console.log(error);
@@ -167,9 +156,9 @@ class EditDataPage extends Component {
 
   handleSubmit(event){
     event.preventDefault();
-    this.sendModifiedData(this.state.schoolData, this.schoolid, this.statisticid);
+    this.sendModifiedData(this.state.schoolData, this.statisticid);
     this.props.history.push('/statistics/' + this.schoolid);
-    window.location.reload();
+    // window.location.reload();
   }
 
   render() { 
@@ -187,7 +176,7 @@ class EditDataPage extends Component {
                     <Col md={12}>
                       <ValidatingFormGroup>
                         <Label for="exampleSelect">School Name</Label>
-                        <Input type="select" name="_id" value={this.schoolid} onChange={this.onChange} disabled>
+                        <Input type="select" name="school_id" value={this.ref_id} onChange={this.onChange} disabled>
                           {this.schoolOption()}
                         </Input>
                       </ValidatingFormGroup>

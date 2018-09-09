@@ -1,14 +1,13 @@
 import axios from 'axios';
 
 class SchoolService {
-
     sendSchoolName(data) {
-      axios.post('http://localhost:4200/api/schools/add', {
-      name: data
-    })
+      axios.post('http://localhost:8000/api/school/', {
+      school_name: data
+    }, )
     .then(res => function() {
       console.log(res);;
-      this.setState({ names: res.data });
+      // this.setState({ names: res.data });
       })
     .catch(function (error) {
       console.log(error);

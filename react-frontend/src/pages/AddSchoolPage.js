@@ -20,7 +20,7 @@ class AddSchoolPage extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {name: ''};
+    this.state = {school_name: ''};
     this.addSchoolService = new SchoolService();
 
     this.handleChange = this.handleChange.bind(this);
@@ -34,7 +34,7 @@ class AddSchoolPage extends Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    this.addSchoolService.sendSchoolName(this.state.name);
+    this.addSchoolService.sendSchoolName(this.state.school_name);
     window.location.reload();
     this.props.history.push('/index');
   }

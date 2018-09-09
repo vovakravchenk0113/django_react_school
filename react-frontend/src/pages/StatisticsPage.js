@@ -11,16 +11,17 @@ class StatisticsPage extends Component {
     this.id = this.props.match.params.id;
     this.state = {
       school: {
-        _id: '',
-        name: '',
-        statistics: []
-      }
+        id: '',
+        school_name: ''    
+      },
+      statistics: []
     }
     this.getSchoolService = new SchoolService();
     this.tableRow = this.tableRow.bind(this);
     this.getData = this.getData.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.deleteData = this.deleteData.bind(this);
+    console.log(this.id);
   }
 
   componentWillReceiveProps () {
@@ -35,10 +36,25 @@ class StatisticsPage extends Component {
     this.getData(id);
   }
 
+  handleArray(array, id){
+    var dataArray = [];
+    array.forEach(element => {
+
+      var urlArray = element.school_id.split('/');
+      var school_id = urlArray[urlArray.length - 2];
+      if (school_id === id) { 
+        dataArray.push(element);
+      }
+    });
+    return dataArray;
+  }
+
   getData(id){
-    axios.get('http://localhost:4200/api/school/'+id)
+    axios.get('http://localhost:8000/api/statistics/statistics/?format=json')
     .then(res => {
-      this.setState({ school: res.data });
+      var dataArray = this.handleArray(res.data.objects, id);
+      this.setState({ statistics: dataArray});
+      console.log(this.state.statistics);
       this.forceUpdate();
       // this.render();
     })
@@ -50,7 +66,7 @@ class StatisticsPage extends Component {
   deleteData(id){
     console.log("schoolid=");
     console.log(this.state.school._id);
-    axios.delete('http://localhost:4200/api/school/' + this.state.school._id + '/statistics/' + id)
+    axios.delete('http://localhost:8000/api/statistics/statistics/' + id + '/')
     .then(res => {this.forceUpdate();})
     .catch(err => console.log(err))
   }
@@ -63,8 +79,8 @@ class StatisticsPage extends Component {
   }
 
   tableRow(){
-    if (this.state.school.statistics instanceof Array) {
-      return this.state.school.statistics.map(function (data, i) {
+    if (this.state.statistics instanceof Array) {
+      return this.state.statistics.map(function (data, i) {
         return  (           
           <tr key={i}>
             <td>{i+1}</td>
@@ -77,10 +93,10 @@ class StatisticsPage extends Component {
             <td>{data.heating_kwh}</td>
             <td>{data.water_eur}</td>
             <td>{data.water_litres}</td>
-            <td><Link to={"/school/"+this.id+"/edit/"+data._id} className="btn btn-primary">Edit</Link></td>
+            <td><Link to={"/school/"+this.id+"/edit/"+data.statistic_id} className="btn btn-primary">Edit</Link></td>
             <td>
                 <form onSubmit={(event) => {this.handleDelete(event)}}>
-                    <input type="hidden" name="id" value={data._id} />
+                    <input type="hidden" name="id" value={data.statistic_id} />
                     <input type="submit" value="Delete" className="btn btn-danger" />
                 </form>
             </td>

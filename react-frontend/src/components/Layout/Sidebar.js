@@ -137,10 +137,15 @@ class Sidebar extends React.Component {
     this.addSchoolService = new SchoolService();
   }
 
+  // contents to add in the following axios function
+  // {headers: {
+  //   'Access-Control-Allow-Origin': true 
+  // }}
+
   componentDidMount(){
-    axios.get('http://localhost:4200/api/schools')
+    axios.get('http://localhost:8000/api/school/?format=json')
     .then(response => {
-      this.setState({ schools: response.data });
+      this.setState({ schools: response.data.objects });
       this.setNavSchools(this.state.schools);
     })
     .catch(function(error) {
@@ -153,7 +158,7 @@ class Sidebar extends React.Component {
     if (schools) {
       schools.map(function(school, i){
         var navSchool = {
-          to: '/statistics/' + school._id , name: school.name, exact: false, Icon: MdBorderAll
+          to: '/statistics/' + school.id , name: school.school_name, exact: false, Icon: MdBorderAll
         };
         navSchools.push(navSchool);
         return navSchools;

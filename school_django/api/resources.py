@@ -8,6 +8,7 @@ class SchoolResource(ModelResource):
         queryset = School.objects.all()
         resource_name = 'school'
         authorization = Authorization()
+        always_return_data = True
         # fields = ['school_name']
 
 class StatisticsResource(ModelResource):
@@ -15,7 +16,6 @@ class StatisticsResource(ModelResource):
     class Meta:
         queryset = Statistics.objects.all()
         resource_name = 'statistics'
-        allowed_methods = ['get', 'post', 'put', 'delete']
         authorization = Authorization()
 
 class UserResource(ModelResource):

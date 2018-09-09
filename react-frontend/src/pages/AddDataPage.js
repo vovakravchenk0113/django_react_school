@@ -29,7 +29,6 @@ class AddDataPage extends Component {
     this.state = {
       schools: [],
       schoolData: {
-                  _id: '',
                   year: '',
                   week: '',
                   month: '',
@@ -38,19 +37,24 @@ class AddDataPage extends Component {
                   heating_eur: '',
                   heating_kwh: '',
                   water_eur: '',
-                  water_litres: '' ,       
+                  water_litres: '' ,
+                  school_id: {
+                    pk : ''
+                  },
+                  ref_id: 0
                   },
       message:''
     };
     this.addSchoolService = new SchoolService();
     this.onChange = this.onChange.bind(this);
+    this.onSchoolChange = this.onSchoolChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.sendSchoolData = this.sendSchoolData.bind(this);
   }
   componentDidMount(){
-    axios.get('http://localhost:4200/api/schools')
+    axios.get('http://localhost:8000/api/school/')
     .then(response => {
-      this.setState({ schools: response.data });
+      this.setState({ schools: response.data.objects });
     })
     .catch(function(error) {
       console.log(error);
@@ -60,7 +64,7 @@ class AddDataPage extends Component {
   schoolOption(){
     if (this.state.schools instanceof Array) {
       return this.state.schools.map(function(school, i){
-        return <option value={school._id} id={school._id} key={i}>{school.name}</option>;
+        return <option value={school.id} id={school.id} key={i}>{school.school_name}</option>;
       })
     }
   }
@@ -102,6 +106,13 @@ class AddDataPage extends Component {
     this.setState({schoolData: schoolData});
   }
 
+  onSchoolChange(event) {
+    const schoolData = Object.assign({}, this.state.schoolData);
+    schoolData['ref_id'] = event.target.value;
+    schoolData['school_id']['pk'] = event.target.value;
+    this.setState({schoolData: schoolData});
+  }
+ 
   notify = () => {
     toast.success("Data added successfully !", {
       position: toast.POSITION.TOP_CENTER
@@ -110,10 +121,11 @@ class AddDataPage extends Component {
 
   // send the school data to server
   sendSchoolData(data) {
-    axios.post('http://localhost:4200/api/schools/statistics', data)
+    axios.post('http://localhost:8000/api/statistics/statistics/?format=json', data)
     .then(res => {      
-      this.setState({ schoolData: res.data , message: res.message});
+      // this.setState({ schoolData: res.data.objects });
       // alert("success");
+      if (res.status === 201)
       ToastStore.success("Data added successfully.", 3000);
     })
     .catch(function (error) {
@@ -144,7 +156,7 @@ class AddDataPage extends Component {
                     <Col md={12}>
                       <ValidatingFormGroup>
                         <Label for="exampleSelect">School Name</Label>
-                        <Input type="select" name="_id" value={schoolData._id} onChange={this.onChange}>
+                        <Input type="select" name="school_id" value={schoolData.ref_id} onChange={this.onSchoolChange}>
                           <option>Select school</option>
                           {this.schoolOption()}
                         </Input>
